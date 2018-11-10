@@ -1,6 +1,7 @@
 package server
 
 import (
+	"crypto/md5"
 	"fmt"
 	_ "github.com/lib/pq"
 	"io"
@@ -44,11 +45,21 @@ func (s *serv) handleProducts() http.HandlerFunc {
 }
 
 func (s *serv) handlePostProductsRequest(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	hasher := md5.New()
+	if _, err := io.Copy(hasher, r.Body); err != nil {
+		handleError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	hash := fmt.Sprintf("%x", hasher.Sum(nil))
+
 	// get hash from body
 	// check in storage if hash exists
 	// if no add to storage and return
 	// if yes: check the timestamp
-	v, ok := s.storage.Lookup("1")
+	v, ok := s.storage.Lookup(hash)
 
 	if ok {
 		w.WriteHeader(http.StatusForbidden)
@@ -61,10 +72,10 @@ func (s *serv) handlePostProductsRequest(w http.ResponseWriter, r *http.Request)
 			return
 		}
 
-		s.storage.Del("1")
+		s.storage.Del(hash)
 	}
 
-	if err := s.storage.Add("1", time.Now()); err != nil {
+	if err := s.storage.Add(hash, time.Now()); err != nil {
 		handleError(w, http.StatusInternalServerError, err)
 		return
 	}

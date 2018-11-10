@@ -65,6 +65,12 @@ func TestHandleNewRecordProperly(t *testing.T) {
 	equals(t, http.StatusOK, res.Code, "first request status code")
 
 	res = httptest.NewRecorder()
+	req = httptest.NewRequest(
+		http.MethodPost,
+		"/products",
+		strings.NewReader(body),
+	)
 	srv.ServeHTTP(res, req)
 	equals(t, http.StatusForbidden, res.Code, "second request status code")
+
 }
