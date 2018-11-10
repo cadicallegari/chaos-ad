@@ -25,6 +25,25 @@ func (s *serv) handleHealthz() http.HandlerFunc {
 
 }
 
+func (s *serv) handleProducts() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			s.handlePostProductsRequest(w, r)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		io.WriteString(w, "ok")
+	}
+
+}
+
+func (s *serv) handlePostProductsRequest(w http.ResponseWriter, req *http.Request) {
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func handleError(w http.ResponseWriter, statusCode int, err error) {
 	var msg string
 	if err != nil {
