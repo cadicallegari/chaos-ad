@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"cadicallegari/chaos-ad/pkg/server"
+	"cadicallegari/chaos-ad/pkg/storage"
 )
 
 var (
@@ -16,7 +17,12 @@ var (
 
 func main() {
 
-	handler := server.New()
+	store, err := storage.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	handler := server.New(store)
 
 	port := "8080"
 	server := &http.Server{

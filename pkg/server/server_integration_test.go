@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"cadicallegari/chaos-ad/pkg/server"
+	"cadicallegari/chaos-ad/pkg/storage"
 )
 
 func assert(tb testing.TB, condition bool, msg string) {
@@ -36,7 +37,8 @@ func equals(tb testing.TB, exp, act interface{}, msg string) {
 // }
 
 func TestShouldBeHealth(t *testing.T) {
-	srv := server.New()
+	store, _ := storage.New()
+	srv := server.New(store)
 
 	res := httptest.NewRecorder()
 	req, err := http.NewRequest("GET", "/healthz", nil)
@@ -47,7 +49,8 @@ func TestShouldBeHealth(t *testing.T) {
 }
 
 func TestHandleNewRecordProperly(t *testing.T) {
-	srv := server.New()
+	store, _ := storage.New()
+	srv := server.New(store)
 
 	body := `[{"id": "123", "name": "mesa"}]`
 
@@ -61,6 +64,7 @@ func TestHandleNewRecordProperly(t *testing.T) {
 	srv.ServeHTTP(res, req)
 	equals(t, http.StatusOK, res.Code, "first request status code")
 
+	res = httptest.NewRecorder()
 	srv.ServeHTTP(res, req)
 	equals(t, http.StatusForbidden, res.Code, "second request status code")
 }

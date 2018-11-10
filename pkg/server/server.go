@@ -5,10 +5,14 @@ import (
 	_ "github.com/lib/pq"
 	"io"
 	"net/http"
+	"time"
+
+	"cadicallegari/chaos-ad/pkg/storage"
 )
 
 type serv struct {
-	router *http.ServeMux
+	storage *storage.Storage
+	router  *http.ServeMux
 }
 
 func (s *serv) handleHealthz() http.HandlerFunc {
@@ -39,9 +43,34 @@ func (s *serv) handleProducts() http.HandlerFunc {
 
 }
 
-func (s *serv) handlePostProductsRequest(w http.ResponseWriter, req *http.Request) {
+func (s *serv) handlePostProductsRequest(w http.ResponseWriter, r *http.Request) {
+	// get hash from body
+	// check in storage if hash exists
+	// if no add to storage and return
+	// if yes: check the timestamp
+	v, ok := s.storage.Lookup("1")
+
+	if ok {
+		w.WriteHeader(http.StatusForbidden)
+		return
+
+		duration := time.Since(v)
+		// TODO logic
+		if duration.Minutes() < 10 {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+
+		s.storage.Del("1")
+	}
+
+	if err := s.storage.Add("1", time.Now()); err != nil {
+		handleError(w, http.StatusInternalServerError, err)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
+
 }
 
 func handleError(w http.ResponseWriter, statusCode int, err error) {
@@ -54,9 +83,10 @@ func handleError(w http.ResponseWriter, statusCode int, err error) {
 	http.Error(w, msg, statusCode)
 }
 
-func New() *http.ServeMux {
+func New(store *storage.Storage) *http.ServeMux {
 	s := serv{
-		router: http.NewServeMux(),
+		storage: store,
+		router:  http.NewServeMux(),
 	}
 
 	s.routes()
