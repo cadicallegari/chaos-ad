@@ -1,0 +1,21 @@
+version: '3'
+services:
+
+  chaos-addev:
+    working_dir: /go/src/cadicallegari/chaos-ad/
+    build:
+      context: .
+      dockerfile: ./hack/Dockerfile.dev
+    env_file:
+      - ./hack/env.dev
+    depends_on:
+      - db
+
+  chaos-ad:
+    image: cadicallegari/chaos-ad
+    env_file:
+      - ./hack/env
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
