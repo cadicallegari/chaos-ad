@@ -1,17 +1,13 @@
 package server
 
 import (
-	"database/sql"
-	"encoding/json"
 	"fmt"
 	_ "github.com/lib/pq"
 	"io"
-	"log"
 	"net/http"
 )
 
 type serv struct {
-	db     *sql.DB
 	router *http.ServeMux
 }
 
@@ -39,9 +35,8 @@ func handleError(w http.ResponseWriter, statusCode int, err error) {
 	http.Error(w, msg, statusCode)
 }
 
-func New(db *sql.DB) *http.ServeMux {
+func New() *http.ServeMux {
 	s := serv{
-		db:     db,
 		router: http.NewServeMux(),
 	}
 

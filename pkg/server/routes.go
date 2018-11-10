@@ -14,5 +14,4 @@ func logRequestMidleware(fn http.HandlerFunc) http.HandlerFunc {
 
 func (s *serv) routes() {
 	s.router.HandleFunc("/healthz", logRequestMidleware(s.handleHealthz()))
-	s.router.HandleFunc("/records", logRequestMidleware(s.handleRecords()))
 }
