@@ -3,15 +3,13 @@
 package server_test
 
 import (
-	"database/sql"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 
 	"cadicallegari/chaos-ad/pkg/server"
+	"cadicallegari/chaos-ad/pkg/storage"
 )
 
 func assert(tb testing.TB, condition bool, msg string) {
@@ -32,14 +30,15 @@ func equals(tb testing.TB, exp, act interface{}, msg string) {
 	}
 }
 
-func setup(t *testing.T) (*http.ServeMux, func()) {
-	db := newDB(t)
-	return server.New(db), func() {
-	}
-}
+// func setup(t *testing.T) (*http.ServeMux, func()) {
+// 	// db := newDB(t)
+// 	// return server.New(db), func() {
+// 	// }
+// }
 
 func TestShouldBeHealth(t *testing.T) {
-	srv := server.New(newDB(t))
+	store, _ := storage.New()
+	srv := server.New(store)
 
 	res := httptest.NewRecorder()
 	req, err := http.NewRequest("GET", "/healthz", nil)
@@ -47,4 +46,31 @@ func TestShouldBeHealth(t *testing.T) {
 
 	srv.ServeHTTP(res, req)
 	equals(t, res.Code, http.StatusOK, "response code")
+}
+
+func TestHandleNewRecordProperly(t *testing.T) {
+	store, _ := storage.New()
+	srv := server.New(store)
+
+	body := `[{"id": "123", "name": "mesa"}]`
+
+	res := httptest.NewRecorder()
+	req := httptest.NewRequest(
+		http.MethodPost,
+		"/products",
+		strings.NewReader(body),
+	)
+
+	srv.ServeHTTP(res, req)
+	equals(t, http.StatusOK, res.Code, "first request status code")
+
+	res = httptest.NewRecorder()
+	req = httptest.NewRequest(
+		http.MethodPost,
+		"/products",
+		strings.NewReader(body),
+	)
+	srv.ServeHTTP(res, req)
+	equals(t, http.StatusForbidden, res.Code, "second request status code")
+
 }
