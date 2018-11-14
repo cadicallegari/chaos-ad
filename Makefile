@@ -47,5 +47,11 @@ run: image
 shell: imagedev
 	$(runcmd)
 
+coverage: imagedev
+	$(runcmd) ./hack/coverage.sh
+
+coverage-show: coverage
+	xdg-open coverage.html
+
 cleanup:
 	docker-compose down
