@@ -3,12 +3,16 @@ package server
 import (
 	"crypto/md5"
 	"fmt"
-	_ "github.com/lib/pq"
 	"io"
 	"net/http"
 	"time"
 
 	"cadicallegari/chaos-ad/pkg/storage"
+)
+
+const (
+	// pass it ass paramter or env var
+	cacheTTL = time.Minute * 10
 )
 
 type serv struct {
@@ -55,33 +59,18 @@ func (s *serv) handlePostProductsRequest(w http.ResponseWriter, r *http.Request)
 
 	hash := fmt.Sprintf("%x", hasher.Sum(nil))
 
-	// get hash from body
-	// check in storage if hash exists
-	// if no add to storage and return
-	// if yes: check the timestamp
-	v, ok := s.storage.Lookup(hash)
-
-	if ok {
-		w.WriteHeader(http.StatusForbidden)
-		return
-
-		duration := time.Since(v)
-		// TODO logic
-		if duration.Minutes() < 10 {
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-
-		s.storage.Del(hash)
-	}
-
-	if err := s.storage.Add(hash, time.Now()); err != nil {
+	ok, err := s.storage.CheckCache(hash, cacheTTL)
+	if err != nil {
 		handleError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	if !ok {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
 
+	w.WriteHeader(http.StatusOK)
 }
 
 func handleError(w http.ResponseWriter, statusCode int, err error) {
