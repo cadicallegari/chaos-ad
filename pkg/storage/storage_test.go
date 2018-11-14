@@ -64,7 +64,7 @@ func TestShouldHandleNewEntriesProperly(t *testing.T) {
 		t.Errorf("Error not expected: %s\n", err)
 	}
 
-	if ok {
+	if !ok {
 		t.Error("valid cache expected")
 	}
 
@@ -73,7 +73,7 @@ func TestShouldHandleNewEntriesProperly(t *testing.T) {
 		t.Errorf("Error not expected: %s\n", err)
 	}
 
-	if !ok {
+	if ok {
 		t.Error("invalid cache expected")
 	}
 
@@ -89,7 +89,7 @@ func TestShouldExpireCacheProperly(t *testing.T) {
 		t.Errorf("Error not expected: %s\n", err)
 	}
 
-	if ok {
+	if !ok {
 		t.Error("valid cache expected")
 	}
 

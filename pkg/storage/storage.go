@@ -2,7 +2,6 @@ package storage
 
 import (
 	"errors"
-	"fmt"
 	"time"
 )
 
@@ -15,7 +14,6 @@ var (
 )
 
 func (s *Storage) Lookup(key string) (time.Time, bool) {
-	fmt.Println("caralho", key)
 	v, ok := s.data[key]
 	return v, ok
 }
@@ -40,7 +38,6 @@ func (s *Storage) Del(key string) error {
 // if yes: check the timestamp
 func (s *Storage) CheckCache(hash string, ttl time.Duration) (bool, error) {
 	v, ok := s.Lookup(hash)
-	fmt.Println(v, ok)
 
 	if !ok {
 		if err := s.Add(hash, time.Now()); err != nil {
