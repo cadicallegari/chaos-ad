@@ -57,7 +57,7 @@ func TestHandleNewRecordProperly(t *testing.T) {
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest(
 		http.MethodPost,
-		"/products",
+		"/v1/products",
 		strings.NewReader(body),
 	)
 
@@ -67,7 +67,7 @@ func TestHandleNewRecordProperly(t *testing.T) {
 	res = httptest.NewRecorder()
 	req = httptest.NewRequest(
 		http.MethodPost,
-		"/products",
+		"/v1/products",
 		strings.NewReader(body),
 	)
 	srv.ServeHTTP(res, req)

@@ -53,3 +53,53 @@ func TestShouldAddAndRecoveryProperly(t *testing.T) {
 	}
 
 }
+
+func TestShouldHandleNewEntriesProperly(t *testing.T) {
+	store, _ := storage.New()
+
+	key := "thekey"
+
+	ok, err := store.CheckCache(key, time.Minute)
+	if err != nil {
+		t.Errorf("Error not expected: %s\n", err)
+	}
+
+	if ok {
+		t.Error("valid cache expected")
+	}
+
+	ok, err = store.CheckCache(key, time.Millisecond)
+	if err != nil {
+		t.Errorf("Error not expected: %s\n", err)
+	}
+
+	if !ok {
+		t.Error("invalid cache expected")
+	}
+
+}
+
+func TestShouldExpireCacheProperly(t *testing.T) {
+	store, _ := storage.New()
+
+	key := "thekey"
+
+	ok, err := store.CheckCache(key, time.Minute)
+	if err != nil {
+		t.Errorf("Error not expected: %s\n", err)
+	}
+
+	if ok {
+		t.Error("valid cache expected")
+	}
+
+	ok, err = store.CheckCache(key, time.Minute)
+	if err != nil {
+		t.Errorf("Error not expected: %s\n", err)
+	}
+
+	if ok {
+		t.Error("invalid cache expected")
+	}
+
+}
