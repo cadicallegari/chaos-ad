@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"cadicallegari/chaos-ad/pkg/storage"
+	"cadicallegari/chaos-ad/pkg/cache"
 )
 
 const (
@@ -16,20 +16,20 @@ const (
 )
 
 type serv struct {
-	storage *storage.Storage
-	router  *http.ServeMux
+	cache  cache.CacherHitter
+	router *http.ServeMux
 }
 
 func (s *serv) handleHealthz() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
-		case http.MethodPost:
-			w.WriteHeader(http.StatusBadRequest)
-			return
+		case http.MethodGet:
+			w.WriteHeader(http.StatusOK)
+			io.WriteString(w, "ok")
+		default:
+			handleError(w, http.StatusBadRequest, nil)
+			// w.WriteHeader(http.StatusBadRequest)
 		}
-
-		w.WriteHeader(http.StatusOK)
-		io.WriteString(w, "ok")
 	}
 
 }
@@ -39,11 +39,10 @@ func (s *serv) handleProducts() http.HandlerFunc {
 		switch r.Method {
 		case http.MethodPost:
 			s.handlePostProductsRequest(w, r)
-			return
+		default:
+			handleError(w, http.StatusMethodNotAllowed, nil)
+			// w.WriteHeader(http.StatusMethodNotAllowed)
 		}
-
-		w.WriteHeader(http.StatusOK)
-		io.WriteString(w, "ok")
 	}
 
 }
@@ -59,7 +58,7 @@ func (s *serv) handlePostProductsRequest(w http.ResponseWriter, r *http.Request)
 
 	hash := fmt.Sprintf("%x", hasher.Sum(nil))
 
-	ok, err := s.storage.CheckCache(hash, cacheTTL)
+	ok, err := s.cache.Hit(hash, cacheTTL)
 	if err != nil {
 		handleError(w, http.StatusInternalServerError, err)
 		return
@@ -78,15 +77,14 @@ func handleError(w http.ResponseWriter, statusCode int, err error) {
 	if err != nil {
 		msg = fmt.Sprintf(`{"error": %q}`, err)
 	}
-	fmt.Sprintf("Error: %s", msg)
-	fmt.Println(msg)
+	fmt.Printf("Sending error status code: %d, msg: %s\n", statusCode, msg)
 	http.Error(w, msg, statusCode)
 }
 
-func New(store *storage.Storage) *http.ServeMux {
+func New(cache cache.CacherHitter) *http.ServeMux {
 	s := serv{
-		storage: store,
-		router:  http.NewServeMux(),
+		cache:  cache,
+		router: http.NewServeMux(),
 	}
 
 	s.routes()

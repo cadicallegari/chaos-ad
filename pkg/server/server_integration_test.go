@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"cadicallegari/chaos-ad/pkg/cache"
 	"cadicallegari/chaos-ad/pkg/server"
-	"cadicallegari/chaos-ad/pkg/storage"
 )
 
 func assert(tb testing.TB, condition bool, msg string) {
@@ -30,14 +30,8 @@ func equals(tb testing.TB, exp, act interface{}, msg string) {
 	}
 }
 
-// func setup(t *testing.T) (*http.ServeMux, func()) {
-// 	// db := newDB(t)
-// 	// return server.New(db), func() {
-// 	// }
-// }
-
 func TestShouldBeHealth(t *testing.T) {
-	store, _ := storage.New()
+	store, _ := cache.NewLocal()
 	srv := server.New(store)
 
 	res := httptest.NewRecorder()
@@ -49,7 +43,7 @@ func TestShouldBeHealth(t *testing.T) {
 }
 
 func TestHandleNewRecordProperly(t *testing.T) {
-	store, _ := storage.New()
+	store, _ := cache.NewLocal()
 	srv := server.New(store)
 
 	body := `[{"id": "123", "name": "mesa"}]`
