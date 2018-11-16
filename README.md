@@ -9,21 +9,23 @@ https://en.wikipedia.org/wiki/Chaos_A.D.
 You will need [docker](https://www.docker.com) and [docker-compose](https://docs.docker.com/compose/) to run the project
 
 
-## The Makifile will provide you some help to test, build and release your project
+## Use
 
-## Run locally
+The Makefile will provide you some help to test, build and release your project
+
+### Run locally
 
 ```
 make run
 ```
 
-## Testing
+### Testing
 
 ```
 make check-integration
 ```
 
-## Releasing
+### Releasing
 
 
 ```
@@ -35,7 +37,7 @@ and used in your preferred container orchestration tool.
 
 Also it will create a git tag with the provided **<version>**
 
-## Vendoring
+### Vendoring
 
 To update vendored dependencies run:
 
