@@ -51,5 +51,5 @@ func commonHitter(c CacherHitter, key string, ttl time.Duration) (bool, error) {
 		return false, err
 	}
 
-	return false, nil
+	return true, nil
 }
