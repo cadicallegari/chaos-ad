@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"cadicallegari/chaos-ad/pkg/storage"
+	"cadicallegari/chaos-ad/pkg/cache"
 )
 
 const (
@@ -16,8 +16,8 @@ const (
 )
 
 type serv struct {
-	storage *storage.Storage
-	router  *http.ServeMux
+	cache  cache.CacherHitter
+	router *http.ServeMux
 }
 
 func (s *serv) handleHealthz() http.HandlerFunc {
@@ -58,7 +58,7 @@ func (s *serv) handlePostProductsRequest(w http.ResponseWriter, r *http.Request)
 
 	hash := fmt.Sprintf("%x", hasher.Sum(nil))
 
-	ok, err := s.storage.CheckCache(hash, cacheTTL)
+	ok, err := s.cache.Hit(hash, cacheTTL)
 	if err != nil {
 		handleError(w, http.StatusInternalServerError, err)
 		return
@@ -81,10 +81,10 @@ func handleError(w http.ResponseWriter, statusCode int, err error) {
 	http.Error(w, msg, statusCode)
 }
 
-func New(store *storage.Storage) *http.ServeMux {
+func New(cache cache.CacherHitter) *http.ServeMux {
 	s := serv{
-		storage: store,
-		router:  http.NewServeMux(),
+		cache:  cache,
+		router: http.NewServeMux(),
 	}
 
 	s.routes()
