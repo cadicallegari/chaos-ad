@@ -34,7 +34,7 @@ func TestShouldAddAndRecoveryProperly(t *testing.T) {
 		t.Error("Should return false when key was not found")
 	}
 
-	if err := s.Add(key, time.Now()); err != nil {
+	if err := s.Add(key, time.Now().String()); err != nil {
 		t.Errorf("Not expected error inserting value for key '%s'", key)
 	}
 

@@ -10,8 +10,8 @@ var (
 )
 
 type Cacher interface {
-	Get(key string) (time.Time, bool)
-	Add(key string, expiration time.Time) error
+	Get(key string) (string, bool)
+	Add(key, value string) error
 	Del(key string) error
 }
 

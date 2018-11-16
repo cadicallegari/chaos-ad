@@ -4,16 +4,16 @@ import (
 	"time"
 )
 
-type LocalCache struct {
-	data map[string]time.Time
+type local struct {
+	data map[string]string
 }
 
-func (c *LocalCache) Get(key string) (time.Time, bool) {
+func (c *local) Get(key string) (string, bool) {
 	v, ok := c.data[key]
 	return v, ok
 }
 
-func (c *LocalCache) Add(key string, value time.Time) error {
+func (c *local) Add(key string, value string) error {
 	_, ok := c.Get(key)
 	if ok {
 		return ErrAlreadyExists
@@ -22,8 +22,8 @@ func (c *LocalCache) Add(key string, value time.Time) error {
 	return nil
 }
 
-func (s *LocalCache) Del(key string) error {
-	delete(s.data, key)
+func (c *local) Del(key string) error {
+	delete(c.data, key)
 	return nil
 }
 
@@ -31,18 +31,22 @@ func (s *LocalCache) Del(key string) error {
 // check in Cache if hash exists
 // if no add to Cache and return
 // if yes: check the timestamp
-func (c *LocalCache) Hit(key string, ttl time.Duration) (bool, error) {
+func (c *local) Hit(key string, ttl time.Duration) (bool, error) {
 	v, ok := c.data[key]
 
 	if !ok {
-		v = time.Now()
-		if err := c.Add(key, time.Now()); err != nil {
+		if err := c.Add(key, time.Now().Format(time.RFC3339)); err != nil {
 			return false, err
 		}
 		return true, nil
 	}
 
-	duration := time.Since(v)
+	dt, err := time.Parse(time.RFC3339, v)
+	if err != nil {
+		return false, err
+	}
+
+	duration := time.Since(dt)
 
 	if duration < ttl {
 		return false, nil
@@ -50,13 +54,13 @@ func (c *LocalCache) Hit(key string, ttl time.Duration) (bool, error) {
 
 	c.Del(key)
 
-	if err := c.Add(key, time.Now()); err != nil {
+	if err := c.Add(key, time.Now().Format(time.RFC3339)); err != nil {
 		return false, err
 	}
 
 	return false, nil
 }
 
-func NewLocal() (*LocalCache, error) {
-	return &LocalCache{data: make(map[string]time.Time)}, nil
+func NewLocal() (*local, error) {
+	return &local{data: make(map[string]string)}, nil
 }

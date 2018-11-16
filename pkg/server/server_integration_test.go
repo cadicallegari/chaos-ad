@@ -8,10 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	// "github.com/go-redis/cache"
-	// "github.com/go-redis/redis"
-	// "github.com/vmihailenco/msgpack"
-
 	"cadicallegari/chaos-ad/pkg/cache"
 	"cadicallegari/chaos-ad/pkg/server"
 )
@@ -33,25 +29,6 @@ func equals(tb testing.TB, exp, act interface{}, msg string) {
 		tb.Errorf("%s, not equals: expecting %v, but got: %v", msg, exp, act)
 	}
 }
-
-// func setup(t *testing.T) (*http.ServeMux, func()) {
-// )
-
-// func main() {
-// 	client := redis.NewClient(&redis.Options{
-// 		Addr:     os.Getenv("REDIS_URL"),
-// 		Password: "", // no password set
-// 		DB:       0,  // use default DB
-// 	})
-
-// 	pong, err := client.Ping().Result()
-// 	fmt.Println(pong, err)
-// }
-
-// db := newDB(t)
-// return server.New(db), func() {
-// }
-// }
 
 func TestShouldBeHealth(t *testing.T) {
 	store, _ := cache.NewLocal()
