@@ -10,14 +10,10 @@ import (
 	"cadicallegari/chaos-ad/pkg/cache"
 )
 
-const (
-	// pass it ass paramter or env var
-	cacheTTL = time.Minute * 10
-)
-
 type serv struct {
-	cache  cache.CacherHitter
-	router *http.ServeMux
+	cache    cache.CacherHitter
+	router   *http.ServeMux
+	cacheTTL time.Duration
 }
 
 func (s *serv) handleHealthz() http.HandlerFunc {
@@ -58,7 +54,7 @@ func (s *serv) handlePostProductsRequest(w http.ResponseWriter, r *http.Request)
 
 	hash := fmt.Sprintf("%x", hasher.Sum(nil))
 
-	ok, err := s.cache.Hit(hash, cacheTTL)
+	ok, err := s.cache.Hit(hash, s.cacheTTL)
 	if err != nil {
 		handleError(w, http.StatusInternalServerError, err)
 		return
@@ -81,10 +77,11 @@ func handleError(w http.ResponseWriter, statusCode int, err error) {
 	http.Error(w, msg, statusCode)
 }
 
-func New(cache cache.CacherHitter) *http.ServeMux {
+func New(cache cache.CacherHitter, ttl time.Duration) *http.ServeMux {
 	s := serv{
-		cache:  cache,
-		router: http.NewServeMux(),
+		cache:    cache,
+		cacheTTL: ttl,
+		router:   http.NewServeMux(),
 	}
 
 	s.routes()

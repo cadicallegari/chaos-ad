@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"cadicallegari/chaos-ad/pkg/cache"
@@ -17,12 +18,22 @@ var (
 
 func main() {
 
-	cache, err := cache.NewLocal()
+	ttl, err := time.ParseDuration(os.Getenv("CACHE_TTL"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	handler := server.New(cache)
+	// cache, err := cache.NewLocal()
+	cache, err := cache.NewRedis(
+		os.Getenv("REDIS_URL"),
+		"",
+		0,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	handler := server.New(cache, ttl)
 
 	port := "8080"
 	server := &http.Server{

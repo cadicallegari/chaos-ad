@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"cadicallegari/chaos-ad/pkg/cache"
 	"cadicallegari/chaos-ad/pkg/server"
@@ -32,7 +33,7 @@ func equals(tb testing.TB, exp, act interface{}, msg string) {
 
 func TestShouldBeHealth(t *testing.T) {
 	store, _ := cache.NewLocal()
-	srv := server.New(store)
+	srv := server.New(store, time.Minute)
 
 	res := httptest.NewRecorder()
 	req, err := http.NewRequest("GET", "/healthz", nil)
@@ -44,7 +45,7 @@ func TestShouldBeHealth(t *testing.T) {
 
 func TestHandleNewRecordProperly(t *testing.T) {
 	store, _ := cache.NewLocal()
-	srv := server.New(store)
+	srv := server.New(store, time.Minute)
 
 	body := `[{"id": "123", "name": "mesa"}]`
 
