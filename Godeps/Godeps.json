@@ -7,21 +7,6 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "github.com/go-redis/cache",
-			"Comment": "v6.3.5-3-gf0317d0",
-			"Rev": "f0317d040a467cf8eb4582746756d040b02c303a"
-		},
-		{
-			"ImportPath": "github.com/go-redis/cache/internal/lrucache",
-			"Comment": "v6.3.5-3-gf0317d0",
-			"Rev": "f0317d040a467cf8eb4582746756d040b02c303a"
-		},
-		{
-			"ImportPath": "github.com/go-redis/cache/internal/singleflight",
-			"Comment": "v6.3.5-3-gf0317d0",
-			"Rev": "f0317d040a467cf8eb4582746756d040b02c303a"
-		},
-		{
 			"ImportPath": "github.com/go-redis/redis",
 			"Comment": "v6.14.2-8-geffc0c5",
 			"Rev": "effc0c507aa2cfe5b7ea45cc8be07de048a19cc3"
@@ -60,16 +45,6 @@
 			"ImportPath": "github.com/go-redis/redis/internal/util",
 			"Comment": "v6.14.2-8-geffc0c5",
 			"Rev": "effc0c507aa2cfe5b7ea45cc8be07de048a19cc3"
-		},
-		{
-			"ImportPath": "github.com/vmihailenco/msgpack",
-			"Comment": "v4.0.1",
-			"Rev": "c4fc0fcdd500af473157759b6d73f935e727ec77"
-		},
-		{
-			"ImportPath": "github.com/vmihailenco/msgpack/codes",
-			"Comment": "v4.0.1",
-			"Rev": "c4fc0fcdd500af473157759b6d73f935e727ec77"
 		}
 	]
 }

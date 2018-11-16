@@ -28,6 +28,7 @@ func (c *redisCache) Del(key string) error {
 }
 
 func (c *redisCache) Hit(key string, ttl time.Duration) (bool, error) {
+	// it could be implemented using the redis peculiarities too
 	return commonHitter(c, key, ttl)
 }
 

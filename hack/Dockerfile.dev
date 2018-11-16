@@ -3,4 +3,3 @@ FROM golang:1.11
 RUN go get github.com/tools/godep
 RUN go get honnef.co/go/tools/...
 RUN go get github.com/go-redis/cache
-RUN go get github.com/vmihailenco/msgpack

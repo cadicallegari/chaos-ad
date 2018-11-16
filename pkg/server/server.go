@@ -24,7 +24,6 @@ func (s *serv) handleHealthz() http.HandlerFunc {
 			io.WriteString(w, "ok")
 		default:
 			handleError(w, http.StatusBadRequest, nil)
-			// w.WriteHeader(http.StatusBadRequest)
 		}
 	}
 
@@ -37,7 +36,6 @@ func (s *serv) handleProducts() http.HandlerFunc {
 			s.handlePostProductsRequest(w, r)
 		default:
 			handleError(w, http.StatusMethodNotAllowed, nil)
-			// w.WriteHeader(http.StatusMethodNotAllowed)
 		}
 	}
 
