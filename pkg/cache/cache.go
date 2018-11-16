@@ -20,10 +20,10 @@ type CacherHitter interface {
 	Hit(key string, expiration time.Duration) (bool, error)
 }
 
-// get hash from body
-// check in Cache if hash exists
-// if no add to Cache and return
-// if yes: check the timestamp
+// If the key does not exists return ok
+// if key exists, check the value that is a inserted date
+// 		if the difference between inserted date and now is greater then ttl return false
+//      if the difference is bigger, update inserted date with now and return true
 func commonHitter(c CacherHitter, key string, ttl time.Duration) (bool, error) {
 	v, ok := c.Get(key)
 
