@@ -9,97 +9,85 @@ import (
 	"cadicallegari/chaos-ad/pkg/cache"
 )
 
-func TestShouldReturnProperlyStatusWhenEmpty(t *testing.T) {
-	s, err := cache.NewLocal()
+func shouldHit(
+	t *testing.T,
+	expectation bool,
+	c cache.CacherHitter,
+	key string,
+	ttl time.Duration,
+) {
+	ok, err := c.Hit(key, ttl)
 	if err != nil {
 		t.Errorf("Error not expected: %s\n", err)
 	}
 
-	_, ok := s.Get("abc")
+	if ok != expectation {
+		t.Errorf("Expecting cache %t, got %t", expectation, ok)
+	}
+
+}
+
+func TestShouldReturnReturnFalseWhenKeyAbsent(t *testing.T) {
+	c, err := cache.NewLocal()
+	if err != nil {
+		t.Errorf("Error not expected: %s\n", err)
+	}
+
+	_, ok := c.Get("not_exists")
 	if ok {
 		t.Errorf("Should return false when key was not found")
 	}
 }
 
-func TestShouldAddAndRecoveryProperly(t *testing.T) {
-	s, err := cache.NewLocal()
+func TestShouldAddAndGetKeyProperly(t *testing.T) {
+	c, err := cache.NewLocal()
 	if err != nil {
 		t.Errorf("Error not expected: %s\n", err)
 	}
 
-	key := "thekey"
+	key, value := "thekey", "thevalue"
 
-	_, ok := s.Get(key)
+	_, ok := c.Get(key)
 	if ok {
 		t.Error("Should return false when key was not found")
 	}
 
-	if err := s.Add(key, time.Now().String()); err != nil {
+	if err := c.Add(key, value); err != nil {
 		t.Errorf("Not expected error inserting value for key '%s'", key)
 	}
 
-	_, ok = s.Get(key)
+	got, ok := c.Get(key)
 	if !ok {
-		t.Errorf("The key '%s' should exists, but don't =(", key)
+		t.Errorf("The key '%s' should exist, but don't =(", key)
 	}
 
-	if err := s.Del(key); err != nil {
+	if value != got {
+		t.Errorf("Expecting: '%s', got '%s'", value, got)
+	}
+
+	if err := c.Del(key); err != nil {
 		t.Errorf("Not expected error removing the key '%s': %s", key, err)
 	}
 
-	_, ok = s.Get(key)
+	_, ok = c.Get(key)
 	if ok {
 		t.Error("the key was removed, why it was found?")
 	}
 
 }
 
-func TestShouldHandleNewEntriesProperly(t *testing.T) {
+func TestShouldHitOkIfTTLHasPassed(t *testing.T) {
 	local, _ := cache.NewLocal()
-
 	key := "thekey"
-
-	ok, err := local.Hit(key, time.Minute)
-	if err != nil {
-		t.Errorf("Error not expected: %s\n", err)
-	}
-
-	if !ok {
-		t.Error("valid cache expected")
-	}
-
-	ok, err = local.Hit(key, time.Millisecond)
-	if err != nil {
-		t.Errorf("Error not expected: %s\n", err)
-	}
-
-	if !ok {
-		t.Error("invalid cache expected")
-	}
-
+	shouldHit(t, true, local, key, time.Minute)
+	shouldHit(t, true, local, key, time.Millisecond)
+	shouldHit(t, true, local, key, time.Millisecond)
 }
 
-func TestShouldExpireCacheProperly(t *testing.T) {
+func TestShouldHitFalseIfTTLNotEnded(t *testing.T) {
 	local, _ := cache.NewLocal()
-
 	key := "thekey"
-
-	ok, err := local.Hit(key, time.Minute)
-	if err != nil {
-		t.Errorf("Error not expected: %s\n", err)
-	}
-
-	if !ok {
-		t.Error("valid cache expected")
-	}
-
-	ok, err = local.Hit(key, time.Minute)
-	if err != nil {
-		t.Errorf("Error not expected: %s\n", err)
-	}
-
-	if ok {
-		t.Error("invalid cache expected")
-	}
-
+	shouldHit(t, true, local, key, time.Millisecond)
+	shouldHit(t, false, local, key, time.Minute)
+	shouldHit(t, true, local, key, time.Millisecond)
 }
