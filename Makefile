@@ -36,17 +36,5 @@ coverage: image
 coverage-show: coverage
 	xdg-open ./tests/coverage/index.html
 
-init:
-	pip install -r requirements.txt
-
-install: init
+install:
 	pip install -e .
-
-# test:
-# 	@python tests/*/*_test.py
-
-# test_build_server:
-# 	cd hack && docker build -t mock_server .
-
-# test_run_server: test_build_server
-# 	docker run --rm -it -p 4567:4567 mock_server

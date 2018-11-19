@@ -8,12 +8,17 @@ import aiohttp
 logger = logging.getLogger(__name__)
 
 
+async def add(x, y):
+    await asyncio.sleep(0.1)
+    return x + y
+
+
 async def hit_url(client, url):
     async with client.get(url) as response:
         return response.status, await response.read()
 
 
-async def newsProducer(queue, inputfn, concurrency):
+async def news_producer(queue, inputfn, concurrency):
     with open(inputfn) as f:
         for line in f:
             await queue.put(line)
@@ -28,7 +33,7 @@ def add_item(colection, key, item):
     colection[key] = items
 
 
-async def newsConsumer(id, queue, products, urls):
+async def news_consumer(id, queue, products, urls, listsize):
     async with aiohttp.ClientSession() as client:
         while True:
             item = await queue.get()
@@ -54,11 +59,13 @@ async def newsConsumer(id, queue, products, urls):
                 add_item(products, p.get("productId"), url)
 
 
-async def _run(queue, inputfn, products, urls, concurrency):
+async def _run(queue, inputfn, products, urls, listsize, concurrency):
     for i in range(concurrency):
-        asyncio.ensure_future(newsConsumer(i, queue, products, urls))
+        asyncio.ensure_future(
+            news_consumer(i, queue, products, urls, listsize)
+        )
 
-    await newsProducer(queue, inputfn, concurrency)
+    await news_producer(queue, inputfn, concurrency)
     await queue.join()
 
 
@@ -69,7 +76,6 @@ def _dump_result(outputfn, products, urls):
 
 
 def run(inputfn, outputfn, listsize, concurrency):
-    # TODO use listsize
     loop = asyncio.get_event_loop()
     queue = asyncio.Queue(loop=loop, maxsize=concurrency)
 
@@ -82,6 +88,7 @@ def run(inputfn, outputfn, listsize, concurrency):
             inputfn=inputfn,
             products=products,
             urls=urls,
+            listsize=listsize,
             concurrency=concurrency,
         )
     )
