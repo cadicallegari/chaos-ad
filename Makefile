@@ -1,5 +1,5 @@
 version ?= latest
-APP_NAME = mypkg
+APP_NAME = chaosad_py
 IMAGE = $(APP_NAME):$(version)
 
 release: publish
@@ -39,11 +39,11 @@ coverage-show: coverage
 init:
 	pip install -r requirements.txt
 
-# test:
-# 	@python tests/*/*_test.py
-
 install: init
 	pip install -e .
+
+# test:
+# 	@python tests/*/*_test.py
 
 # test_build_server:
 # 	cd hack && docker build -t mock_server .

@@ -1,6 +1,18 @@
-mypkg:
-  image: mypkg:latest
-  volumes:
-   - .:/app
-   - ./tests/debug:/app/tests/debug
-   - ./tests/coverage:/app/tests/coverage
+version: '3'
+services:
+
+  chaosad_py:
+    image: chaosad_py:latest
+    volumes:
+     - .:/app
+     - ./tests/debug:/app/tests/debug
+     - ./tests/coverage:/app/tests/coverage
+    links:
+      - dummyserver
+
+  dummyserver:
+    build:
+      context: ./tests/dummyserver/
+    ports:
+      - "4567:4567"
+

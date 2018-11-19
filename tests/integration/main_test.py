@@ -1,6 +1,6 @@
 import unittest
 
-from mypkg import main
+from chaosad_py import main
 
 
 class TestMain(unittest.TestCase):

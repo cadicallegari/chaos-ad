@@ -1,6 +1,10 @@
 import unittest
 
-from mypkg import main
+from chaosad_py import main
+
+
+# sys.path.insert(0, os.path.abspath('..'))
+# from bootstrap.stuff import Stuff
 
 
 class TestMain(unittest.TestCase):
