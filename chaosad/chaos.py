@@ -8,23 +8,9 @@ import aiohttp
 logger = logging.getLogger(__name__)
 
 
-async def add(x, y):
-    await asyncio.sleep(0.1)
-    return x + y
-
-
-async def hit_url(client, url):
+async def fetch_url(client, url):
     async with client.get(url) as response:
         return response.status, await response.read()
-
-
-async def news_producer(queue, inputfn, concurrency):
-    with open(inputfn) as f:
-        for line in f:
-            await queue.put(line)
-
-    for i in range(concurrency):
-        await queue.put(None)
 
 
 def add_item(colection, key, item):
@@ -33,46 +19,80 @@ def add_item(colection, key, item):
     colection[key] = items
 
 
-async def news_consumer(id, queue, products, urls, listsize):
-    async with aiohttp.ClientSession() as client:
-        while True:
-            item = await queue.get()
-            queue.task_done()
-            if item is None:
-                break
-
-            # {"productId":"pid482","image":"http://localhost:4567/images/167410.png"}
-            p = json.loads(item)
-            url = p.get("image")
-
-            try:
-                if url not in urls:
-                    status, body = await hit_url(client, url)
-                    urls[url] = status == 200
-            except aiohttp.ClientError as err:
-                # TODO handle it properly
-                print(err)
-                continue
-
-            r = urls[url]
-            if r:
-                add_item(products, p.get("productId"), url)
+def dump_result(outputfn, products, urls):
+    with open(outputfn, "w") as f:
+        for k, v in products.items():
+            f.write(json.dumps(
+                {"productId": k, "images": v},
+                ensure_ascii=False)
+            )
+            f.write("\n")
 
 
-async def _run(queue, inputfn, products, urls, listsize, concurrency):
+def should_process(products, urls, pid, url, maxsize):
+    if url in urls or len(products.get(pid, [])) >= maxsize:
+        return False
+    return True
+
+
+def item_handler_builder(fetcher, products, urls, maxsize):
+    async def handler(client, item):
+        p = json.loads(item)
+        url = p.get("image")
+        pid = p.get("productId")
+
+        if not should_process(products, urls, pid, url, maxsize):
+            return
+
+        try:
+            status, body = await fetcher(client, url)
+            urls[url] = status == 200
+
+        except aiohttp.ClientError as err:
+            # TODO handle it properly
+            print(err)
+            return
+
+        add_item(products, pid, url) if urls[url] else ""
+
+    return handler
+
+
+def consumer_builder(queue, handler):
+    async def consumer(id):
+        async with aiohttp.ClientSession() as client:
+            while True:
+                item = await queue.get()
+                queue.task_done()
+                if item is None:
+                    break
+                await handler(client, item)
+    return consumer
+
+
+def load_builder(inputfn):
+    with open(inputfn) as f:
+        for line in f:
+            yield line
+
+
+def producer_builder(queue, loader, concurrency):
+    async def producer():
+        for item in loader:
+            await queue.put(item)
+
+        for i in range(concurrency):
+            await queue.put(None)
+
+    return producer
+
+
+async def _run(producer, consumer, concurrency):
     for i in range(concurrency):
-        asyncio.ensure_future(
-            news_consumer(i, queue, products, urls, listsize)
-        )
+        asyncio.ensure_future(consumer(i))
 
-    await news_producer(queue, inputfn, concurrency)
-    await queue.join()
-
-
-def _dump_result(outputfn, products, urls):
-    print(outputfn)
-    print(urls)
-    print(products)
+    await producer()
+    # await queue.join()
 
 
 def run(inputfn, outputfn, listsize, concurrency):
@@ -82,17 +102,19 @@ def run(inputfn, outputfn, listsize, concurrency):
     products = {}
     urls = {}
 
+    loader = load_builder(inputfn)
+    producer = producer_builder(queue, loader, concurrency)
+    handler = item_handler_builder(fetch_url, products, urls, listsize)
+    c_builder = consumer_builder(queue, handler)
+
     future = asyncio.ensure_future(
         _run(
-            queue=queue,
-            inputfn=inputfn,
-            products=products,
-            urls=urls,
-            listsize=listsize,
+            producer=producer,
+            consumer=c_builder,
             concurrency=concurrency,
         )
     )
 
     loop.run_until_complete(future)
 
-    _dump_result(outputfn, products, urls)
+    dump_result(outputfn, products, urls)

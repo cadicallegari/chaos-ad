@@ -23,5 +23,5 @@ if [ $# -ne 0 ]; then
     exit
 fi
 
-dir=./tests/integration/
+dir=./tests/integration
 check_all_tests_on_dir

@@ -1,47 +1,47 @@
 import unittest
-# import tempfile
 import asyncio
-# import shutil
 
-import aiounittest
 
 from chaosad import chaos
 
 
-# class TestMain(unittest.TestCase):
-
-#     def setUp(self):
-#         self._tmpdir = tempfile.mkdtemp()
-
-#     def tearDown(self):
-#         shutil.rmtree(self._tmpdir)
-
-#     def test_should_sum_properly(self):
-#         self.assertEqual(4, main.sum(2, 2))
-
-class Test(unittest.TestCase):
+class ChaosTest(unittest.TestCase):
 
     def setUp(self):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(None)
 
-    def test_xxx(self):
-        async def go():
-            ret = await chaos.add(5, 6)
-            self.assertEqual(ret, 12)
+    def test_should_add_url_to_product_on_success(self):
+        async def fakefetcher(c, item):
+            return 200, ""
 
-        self.loop.run_until_complete(go())
+        prods = {}
+        urls = {}
+        handler = chaos.item_handler_builder(fakefetcher, prods, urls, 1)
 
+        raw = '{"productId": "pid", "image":"fake/url"}'
 
-class ChaosTest(aiounittest.AsyncTestCase):
+        self.loop.run_until_complete(handler(None, raw))
 
-    async def test_async_add(self):
-        ret = await chaos.add(5, 6)
-        self.assertEqual(ret, 11)
+        self.assertEqual({"pid": ["fake/url"]}, prods)
+        self.assertEqual({"fake/url": True}, urls)
 
-    # some regular test code
-    def test_something(self):
-        self.assertTrue(True)
+    def test_should_respect_url_limit(self):
+        async def fakefetcher(c, item):
+            return 200, ""
+
+        prods = {}
+        urls = {}
+        handler = chaos.item_handler_builder(fakefetcher, prods, urls, 2)
+
+        for i in range(5):
+            raw = '{"productId": "pid", "image":"fake/url-%d"}' % i
+            self.loop.run_until_complete(handler(None, raw))
+
+        self.assertEqual(
+            {'pid': ['fake/url-0', 'fake/url-1']},
+            prods
+        )
 
 
 if __name__ == '__main__':
