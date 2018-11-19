@@ -1,5 +1,37 @@
-cmd/chaos-ad/chaos-ad
-coverage.html
-coverage.txt
-tmp/
-profile.out
+## generic files to ignore
+*~
+*.lock
+*.DS_Store
+*.swp
+*.out
+.#*.*
+
+## python and django specific
+*.log
+*.pot
+*.pyc
+local_settings.py
+
+## database files
+*.sqlite
+*.sqli
+
+## Django files
+.dir-locals.el
+
+
+*.vim
+## Directories
+eggs/
+docs/_build/
+*.egg-info/
+
+## Test stuff
+tests/debug
+tests/coverage
+.coverage
+
+##DEPS
+.deps
+
+.venv/

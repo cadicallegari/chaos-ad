@@ -1,0 +1,6 @@
+mypkg:
+  image: mypkg:latest
+  volumes:
+   - .:/app
+   - ./tests/debug:/app/tests/debug
+   - ./tests/coverage:/app/tests/coverage
