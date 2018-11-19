@@ -5,6 +5,7 @@ services:
     image: chaosad_py:latest
     volumes:
      - .:/app
+     - ./tests/testdata:/testdata
      - ./tests/debug:/app/tests/debug
      - ./tests/coverage:/app/tests/coverage
     links:
