@@ -1,0 +1,5 @@
+cmd/chaos-ad/chaos-ad
+coverage.html
+coverage.txt
+tmp/
+profile.out

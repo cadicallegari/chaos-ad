@@ -1,0 +1,21 @@
+version: '3'
+services:
+
+  redis:
+    image: redis:alpine
+
+  chaos-addev:
+    image: chaos-addev
+    env_file:
+      - ./hack/env.dev
+    links:
+      - redis
+
+  chaos-ad:
+    image: cadicallegari/chaos-ad
+    env_file:
+      - ./hack/env
+    ports:
+      - "8080:8080"
+    links:
+      - redis
