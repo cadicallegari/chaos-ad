@@ -1,8 +1,4 @@
-# chaos-ad
-
-named after the amazing album
-https://en.wikipedia.org/wiki/Chaos_A.D.
-
+# API de produtos
 
 ## Requirements
 

@@ -1,6 +1,7 @@
 import json
 import asyncio
 import logging
+import gzip
 
 import aiohttp
 
@@ -70,10 +71,10 @@ def consumer_builder(queue, handler):
     return consumer
 
 
-def load_builder(inputfn):
-    with open(inputfn) as f:
+def input_loader(inputfn):
+    with gzip.open(inputfn) as f:
         for line in f:
-            yield line
+            yield line.decode()
 
 
 def producer_builder(queue, loader, concurrency):
@@ -92,7 +93,6 @@ async def _run(producer, consumer, concurrency):
         asyncio.ensure_future(consumer(i))
 
     await producer()
-    # await queue.join()
 
 
 def run(inputfn, outputfn, listsize, concurrency):
@@ -102,7 +102,7 @@ def run(inputfn, outputfn, listsize, concurrency):
     products = {}
     urls = {}
 
-    loader = load_builder(inputfn)
+    loader = input_loader(inputfn)
     producer = producer_builder(queue, loader, concurrency)
     handler = item_handler_builder(fetch_url, products, urls, listsize)
     c_builder = consumer_builder(queue, handler)
