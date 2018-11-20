@@ -5,10 +5,7 @@ services:
     image: redis:alpine
 
   chaos-addev:
-    working_dir: /go/src/cadicallegari/chaos-ad/
-    build:
-      context: .
-      dockerfile: ./hack/Dockerfile.dev
+    image: chaos-addev
     env_file:
       - ./hack/env.dev
     links:
