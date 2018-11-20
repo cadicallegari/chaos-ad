@@ -18,7 +18,7 @@ class TestChaos(unittest.TestCase):
     def test_should_create_output_file_properly(self):
         outputfn = path.join(self._tmpdir, "output-file")
         chaos.run(
-            inputfn="/testdata/input-dump",
+            inputfn="/testdata/input-dump.gz",
             outputfn=outputfn,
             listsize=3,
             concurrency=100,
